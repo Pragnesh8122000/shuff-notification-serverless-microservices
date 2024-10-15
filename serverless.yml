@@ -1,0 +1,128 @@
+service: src-service
+frameworkVersion: "4"
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  versionFunctions: false
+  stage: "dev"
+  region: eu-central-1
+  httpApi:
+    cors:
+      allowedOrigins:
+        - "*"
+      allowedHeaders:
+        - "Content-Type"
+        - "Authorization"
+        - "accesstoken"
+      allowedMethods:
+        - GET
+        - POST
+        - PUT
+        - DELETE
+      allowCredentials: true
+      authorizers:
+        adminAuthorizer:
+          type: request
+          functionArn: arn:aws:lambda:ap-south-1:433591551881:function:adminAuthorizer
+  timeout: 30
+
+functions: 
+  AddNotification:
+    handler: src/handler.AddNotification
+    events:
+      - httpApi:
+          path: /web/addNotification
+          method: post
+          authorizer: adminAuthorizer
+  
+  GetAllNotificationList:
+    handler: src/handler.GetAllNotificationList
+    events:
+      - httpApi:
+          path: /web/getAllNotificationList
+          method: post
+          authorizer: adminAuthorizer
+
+  ViewNotificationById:
+    handler: src/handler.ViewNotificationById
+    events:
+      - httpApi:
+          path: /web/viewNotificationById
+          method: post
+          authorizer: adminAuthorizer
+  
+  EditNotification:
+    handler: src/handler.EditNotification
+    events:
+      - httpApi:
+          path: /web/editNotification
+          method: post
+          authorizer: adminAuthorizer
+
+package:
+  individually: true
+  include:
+    - src/package.json
+  exclude:
+    - node_modules/**
+    - tests/**
+    - .git/**
+    - logs/**
+    - docs/**
+
+custom:
+  warmup:
+    default:
+      enabled: true
+      folderName: '.warmup'
+      cleanFolder: false
+      memorySize: 256
+      name: warmer-default
+      roleName: warmupFunctions
+      role: WarmupRole
+      events:
+        - schedule: 'cron(0/5 8-17 ? * MON-FRI *)'
+      package:
+        individually: true
+        patterns:
+          - '!../**'
+          - '!../../**'
+          - ./**
+      tracing: true
+      verbose: false
+      logRetentionInDays: 14
+      prewarm: true
+      payloadRaw: true
+      concurrency: 5
+
+resources:
+  Resources:
+    WarmupRole:
+      Type: AWS::IAM::Role
+      Properties:
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service: lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: WarmupRolePolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource: arn:aws:logs:*:*:*
+
+plugins:
+  - serverless-offline
+  - serverless-plugin-warmup
+  # - serverless-prune-plugin
+  # - serverless-package-external
+  # - serverless-dotenv-plugin
