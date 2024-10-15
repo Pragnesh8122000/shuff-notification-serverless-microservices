@@ -6,7 +6,7 @@ provider:
   runtime: nodejs18.x
   versionFunctions: false
   stage: "dev"
-  region: eu-central-1
+  region: "ap-south-1"
   httpApi:
     cors:
       allowedOrigins:
@@ -20,11 +20,10 @@ provider:
         - POST
         - PUT
         - DELETE
-      allowCredentials: true
-      authorizers:
-        adminAuthorizer:
-          type: request
-          functionArn: arn:aws:lambda:ap-south-1:433591551881:function:adminAuthorizer
+    authorizers:
+      adminAuthorizer:
+        type: request
+        functionArn: arn:aws:lambda:ap-south-1:433591551881:function:adminAuthorizer
   timeout: 30
 
 functions: 
@@ -71,58 +70,9 @@ package:
     - logs/**
     - docs/**
 
-custom:
-  warmup:
-    default:
-      enabled: true
-      folderName: '.warmup'
-      cleanFolder: false
-      memorySize: 256
-      name: warmer-default
-      roleName: warmupFunctions
-      role: WarmupRole
-      events:
-        - schedule: 'cron(0/5 8-17 ? * MON-FRI *)'
-      package:
-        individually: true
-        patterns:
-          - '!../**'
-          - '!../../**'
-          - ./**
-      tracing: true
-      verbose: false
-      logRetentionInDays: 14
-      prewarm: true
-      payloadRaw: true
-      concurrency: 5
-
-resources:
-  Resources:
-    WarmupRole:
-      Type: AWS::IAM::Role
-      Properties:
-        AssumeRolePolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Principal:
-                Service: lambda.amazonaws.com
-              Action: sts:AssumeRole
-        Policies:
-          - PolicyName: WarmupRolePolicy
-            PolicyDocument:
-              Version: '2012-10-17'
-              Statement:
-                - Effect: Allow
-                  Action:
-                    - logs:CreateLogGroup
-                    - logs:CreateLogStream
-                    - logs:PutLogEvents
-                  Resource: arn:aws:logs:*:*:*
-
 plugins:
   - serverless-offline
   - serverless-plugin-warmup
-  # - serverless-prune-plugin
-  # - serverless-package-external
-  # - serverless-dotenv-plugin
+  - serverless-prune-plugin
+  - serverless-package-external
+  - serverless-dotenv-plugin
