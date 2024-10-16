@@ -25,7 +25,7 @@ export const addNotification = async (event: APIGatewayProxyEventV2) => {
         }
         const { templateName, headerContent, bodyContent,  bodyImage= "" } = input;
         const requiredFields = ["templateName", "headerContent", "bodyContent", "bodyImage"];
-        const adminId = (event as any).admin.id;
+        const adminId =  (event as any).requestContext.authorizer.lambda.id;
         const operation = 'create';
         const uniqueField1 = 'id';
         const uniqueField2 = 'templateName';
@@ -188,7 +188,7 @@ export const editNotification = async (event: APIGatewayProxyEventV2) => {
         }
         const { id = "", templateName, headerContent, bodyContent,  bodyImage } = input;
         const requiredFields = ["templateName", "headerContent", "bodyContent"];
-        const adminId = (event as any).admin.id;
+        const adminId =  (event as any).requestContext.authorizer.lambda.id;
         const uniqueField1 = 'id';
         const uniqueField2 = 'templateName';
         const operation = 'update';

@@ -1,5 +1,5 @@
 import NotificationTemplate from "../../models/notificationTemplateModel.js";
-import NotificationHistory from "../..//models/notificationHistoryModel.js";
+import NotificationHistory from "../../models/notificationHistoryModel.js";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import middy from "@middy/core";
 import bodyParser from '@middy/http-json-body-parser';
