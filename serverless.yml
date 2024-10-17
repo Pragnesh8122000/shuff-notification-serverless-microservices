@@ -1,4 +1,4 @@
-service: src-service
+service: shuff-alert-service
 frameworkVersion: "4"
 
 provider:
@@ -106,6 +106,20 @@ functions:
           path: /web/updateEmailTemplateStatus
           method: post
           authorizer: adminAuthorizer
+  
+  SendOtpMessage:
+    handler: src/handler.SendOtpMessage
+    events:
+      - httpApi:
+          path: /web/sendOtpMessage
+          method: post
+
+  VerifySmsOtp:
+    handler: src/handler.VerifySmsOtp
+    events:
+      - httpApi:
+          path: /web/verifySmsOtp
+          method: post
 
 package:
   individually: true

@@ -10,3 +10,4 @@ import { DBClient } from "./config/databaseClient.js";
 
 export * from "./web/handlers/notificationHandler.js";
 export * from "./web/handlers/emailHandler.js";
+export * from "./web/handlers/smsHandler.js";

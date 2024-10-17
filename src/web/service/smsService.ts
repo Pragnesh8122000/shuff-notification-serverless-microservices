@@ -15,6 +15,7 @@ export const sendOtpMessage = async (event: APIGatewayProxyEventV2) => {
         const { phone, otp } = input;
 
         const otpResult = await performModelQuery("Otp", "findOne", { query: { phone } });
+        console.log(otpResult);
 
         if (otpResult) {
             otpResult.otp = otp;
@@ -35,9 +36,44 @@ export const sendOtpMessage = async (event: APIGatewayProxyEventV2) => {
 
         const isSend = await sendMessage(phone, otp);
         if (isSend) {
-            return formatResponse(RESPONSE_STATUS.SUCCESS, HTTP_CODE.OK, "OTP_SENT", []);
+            return formatResponse(RESPONSE_STATUS.SUCCESS, HTTP_CODE.OK, "OTP_SENT", { isSent: true });
         }
+       else{
+        return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "OTP_SENDING_ERROR", { isSent: false });
+       }
+    } catch (error) {
+        console.log(error);
         return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "SOMETHING_WENT_WRONG", []);
+    }
+}
+
+export const verifySmsOtp = async (event: APIGatewayProxyEventV2) => {
+    try {
+        if (!event.body) return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "ALL_VALUES_REQUIRED", []);
+        const input: any = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
+        const { phone, otp } = input;
+        const query = {
+            "phone": phone,
+            "otp": otp,
+            "expiresAt": { $gte: new Date() },
+            "isVerified": 0
+        };
+
+        let otpResult = await OtpModel.findOne(query);
+
+        if (!otpResult) {
+            return formatResponse(RESPONSE_STATUS.SUCCESS, HTTP_CODE.OK, "OTP_INVALID", { isValid: false });
+        }
+
+        otpResult.isVerified = 1;
+
+        const result = await otpResult.save();
+        if (result) {
+            return formatResponse(RESPONSE_STATUS.SUCCESS, HTTP_CODE.OK, "USER_LOGGED_IN", { isValid: true });
+        }
+        else {
+            return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "OTP_INVALID", { isValid: false });
+        }
     } catch (error) {
         console.log(error);
         return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "SOMETHING_WENT_WRONG", []);
