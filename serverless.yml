@@ -111,14 +111,14 @@ functions:
     handler: src/handler.SendOtpMessage
     events:
       - httpApi:
-          path: /web/sendOtpMessage
+          path: /app/sendOtpMessage
           method: post
 
   VerifySmsOtp:
     handler: src/handler.VerifySmsOtp
     events:
       - httpApi:
-          path: /web/verifySmsOtp
+          path: /app/verifySmsOtp
           method: post
 
 package:
