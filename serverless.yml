@@ -1,4 +1,4 @@
-service: src-service
+service: shuff-alert-service
 frameworkVersion: "4"
 
 provider:
@@ -23,7 +23,7 @@ provider:
     authorizers:
       adminAuthorizer:
         type: request
-        functionArn: arn:aws:lambda:ap-south-1:433591551881:function:adminAuthorizer
+        functionArn: ${env:ADMIN_AUTHORIZER_ARN}
   timeout: 30
 
 functions: 
@@ -59,16 +59,85 @@ functions:
           method: post
           authorizer: adminAuthorizer
 
+  CreateEmailTemplate:
+    handler: src/handler.CreateEmailTemplate
+    events:
+      - httpApi:
+          path: /web/createEmailTemplate
+          method: post
+          authorizer: adminAuthorizer
+  
+  UpdateEmailTemplate:
+    handler: src/handler.UpdateEmailTemplate
+    events:
+      - httpApi:
+          path: /web/updateEmailTemplate
+          method: post
+          authorizer: adminAuthorizer
+  
+  GetAllEmailTemplates:
+    handler: src/handler.GetAllEmailTemplates
+    events:
+      - httpApi:
+          path: /web/getAllEmailTemplates
+          method: post
+          authorizer: adminAuthorizer
+  
+  GetEmailTemplateByMailKey:
+    handler: src/handler.GetEmailTemplateByMailKey
+    events:
+      - httpApi:
+          path: /web/getEmailTemplateByMailKey
+          method: post
+          authorizer: adminAuthorizer
+  
+  GetEmailTemplateById:
+    handler: src/handler.GetEmailTemplateById
+    events:
+      - httpApi:
+          path: /web/getEmailTemplateById
+          method: post
+          authorizer: adminAuthorizer
+  
+  UpdateEmailTemplateStatus:
+    handler: src/handler.UpdateEmailTemplateStatus
+    events:
+      - httpApi:
+          path: /web/updateEmailTemplateStatus
+          method: post
+          authorizer: adminAuthorizer
+  
+  SendOtpMessage:
+    handler: src/handler.SendOtpMessage
+    events:
+      - httpApi:
+          path: /app/sendOtpMessage
+          method: post
+
+  VerifySmsOtp:
+    handler: src/handler.VerifySmsOtp
+    events:
+      - httpApi:
+          path: /app/verifySmsOtp
+          method: post
+
 package:
   individually: true
   include:
-    - src/package.json
+    - package.json
   exclude:
     - node_modules/**
     - tests/**
     - .git/**
     - logs/**
     - docs/**
+    - .gitignore
+    - npm-debug.log
+    - .serverless/**
+    - .serverless_plugins/**
+    - env/**
+    - package-lock.json
+    - serverless.yml
 
 plugins:
   - serverless-offline

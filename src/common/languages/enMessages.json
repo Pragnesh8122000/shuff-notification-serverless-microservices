@@ -36,5 +36,8 @@
   "PROFILE_DELETED": "Your account has been successfully deleted. If you change your mind, you can always create a new account. For any questions or feedback, please contact our support team.",
   "USER_VERIFICATION_SUCCESS": "User verified successfully!",
   "MAX_ADDRESS_LIMIT_REACHED": "Maximum address limit reached",
-  "EMAIL_AND_PASSWORD_REQUIRED": "Email and password required"
+  "EMAIL_AND_PASSWORD_REQUIRED": "Email and password required",
+  "ID_AND_STATUS_REQUIRED": "Id and status required",
+  "INVALID_STATUS_TYPE": "Invalid status type",
+  "MAIL_KEY_REQUIRED": "Mail key required"
 }
