@@ -62,7 +62,7 @@ export const updateEmailTemplate = async (event: APIGatewayProxyEventV2) => {
         }
 
         if (isAutomatic == 0) {
-            requiredFields.push("subject", "bodyContent", "title", "marketingCategoryId");
+            requiredFields.push("subject", "bodyContent", "title");
         }
 
         const missingFields = newRequiredFieldsValidation(requiredFields, input);
@@ -113,7 +113,7 @@ export const getAllEmailTemplates = async (event: APIGatewayProxyEventV2) => {
     try {
         if (!event.body) return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "ALL_VALUES_REQUIRED", []);
         let input: emailTemplateInterface = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
-        let { page = "*", limit = 10, isSearch = false, search1 = '', search2 = '', search3 = '', type = 'manual' } = input;
+        let { page = "*", limit = 10, isSearch = false, search1 = '', search2 = '', type = 'manual' } = input;
         let filterCondition: any = {};
         if (page != "*") {
             page = typeof page === 'string' ? parseInt(page) : page;
@@ -132,10 +132,9 @@ export const getAllEmailTemplates = async (event: APIGatewayProxyEventV2) => {
         let searchDataFilter = [];
         const searchFields = {
             "search1": { 'field': 'title', 'type': 'regex' },
-            "search2": { 'field': 'marketingCategoryId', 'type': 'equal', 'dataType': 'Object' },
-            "search3": { 'field': 'status', 'type': 'equal', 'dataType': 'Number' }
+            "search2": { 'field': 'status', 'type': 'equal', 'dataType': 'Number' }
         };
-        searchDataFilter = await getSearchFilterCondition(searchFields, { search1, search2, search3 });
+        searchDataFilter = await getSearchFilterCondition(searchFields, { search1, search2 });
         if (searchDataFilter.length > 0) {
             filterCondition.$and = searchDataFilter
         }
@@ -284,7 +283,6 @@ export const getEmailTemplateByMailKey = async (event: APIGatewayProxyEventV2) =
             "title": 1,
             "subject": 1,
             "bodyContent": 1,
-            "marketingCategoryId": 1,
             "status": 1,
             "createdAt": {
                 $dateToString: {
