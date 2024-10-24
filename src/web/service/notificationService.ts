@@ -70,7 +70,7 @@ export const getAllNotificationList = async (event: APIGatewayProxyEventV2) => {
 
         let filterCondition: any = {};
         
-        let { page = 1, limit = 10, isSearch = false, search1 = '', search2 = '', search3 = '' } = input;
+        let { page = 1, limit = 10, isSearch = false, search1 = '', search2 = '' } = input;
         page = (isSearch) ? 1 : (typeof page === 'string' ? parseInt(page) : page);
         limit = typeof limit === 'string' ? parseInt(limit) : limit;
         
@@ -87,7 +87,7 @@ export const getAllNotificationList = async (event: APIGatewayProxyEventV2) => {
         "search1": { 'field': 'templateName', 'type': 'regex' },
         "search2": { 'field': 'status', 'type': 'equal', 'dataType': 'Number' }
       };
-      searchDataFilter = await getSearchFilterCondition(searchFields, { search1, search2, search3 });
+      searchDataFilter = await getSearchFilterCondition(searchFields, { search1, search2 });
       if (searchDataFilter.length > 0) {
         filterCondition.$and = searchDataFilter
       }
@@ -110,7 +110,14 @@ export const getAllNotificationList = async (event: APIGatewayProxyEventV2) => {
     
         const { result, totalPages, currentPage, totalCount, remainingCount } = await performAggregationQuery(modelName, lookupConfigs, projectionFields, sortConfig, matchCondition, pageSize, pageNumber, unwindLookupIndices);
         if (totalCount > 0) {
-          return formatResponse(RESPONSE_STATUS.SUCCESS, HTTP_CODE.OK, "DATA_FETCHED", { result, totalPages, currentPage, totalCount, remainingCount });
+          const S3_URL = process.env.S3_URL as string;
+          const modifiedResult = result.map((val: any) => {
+            return {
+              ...val,
+              bodyImage: S3_URL + val.bodyImage
+            }
+          })
+          return formatResponse(RESPONSE_STATUS.SUCCESS, HTTP_CODE.OK, "DATA_FETCHED", { result:modifiedResult, totalPages, currentPage, totalCount, remainingCount });
         } else {
           return formatResponse(RESPONSE_STATUS.SUCCESS, HTTP_CODE.OK, "NO_DATA", { result, totalPages, currentPage, totalCount, remainingCount });
         }
