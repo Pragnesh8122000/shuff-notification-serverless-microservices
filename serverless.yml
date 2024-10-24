@@ -120,6 +120,14 @@ functions:
       - httpApi:
           path: /app/verifySmsOtp
           method: post
+  
+  UpdateNotificationStatus:
+    handler: src/handler.UpdateNotificationStatus
+    events:
+      - httpApi:
+          path: /web/updateNotificationStatus
+          method: post
+          authorizer: adminAuthorizer
 
 package:
   individually: true

@@ -1,5 +1,5 @@
 import { isEmail, isMongoObjectId, isPositiveNumber, isValidEnum, newRequiredFieldsValidation } from "../../common/validation.js";
-import { LookupConfig, SortConfig, TableInputType } from "../interfaces/commonUtilsInterfaces.js";
+import { IUpdateStatusRequest, LookupConfig, SortConfig, TableInputType } from "../interfaces/commonUtilsInterfaces.js";
 import { INotificationData } from "../interfaces/notificationInterface.js";
 import { checKFieldValueExist, getSearchFilterCondition, performAggregationQuery, performModelQuery } from "../utility/commonUtils.js";
 // import { handleImageUploadForUpdate } from "../utility/notificationUtils.js";
@@ -242,4 +242,55 @@ export const editNotification = async (event: APIGatewayProxyEventV2) => {
         console.log(error);
         return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.SERVER_ERROR, "SOMETHING_WENT_WRONG");
       }
+}
+
+export const updateNotificationStatus = async (event: APIGatewayProxyEventV2) => {
+  try {
+    if (!event.body) return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "ALL_VALUES_REQUIRED", []);;
+    let input: IUpdateStatusRequest;
+
+    if (typeof event.body === 'string') {
+      input = JSON.parse(event.body);
+    } else {
+      input = event.body;
+    }
+    const { status, id } = input;    
+    const updatedBy = (event as any).requestContext.authorizer.lambda.id;
+    const operation = "updateStatus";
+    const uniqueField = "id";
+
+    if (!id || status == null) {
+      return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "ID_AND_STATUS_REQUIRED");
+    }
+
+    if (!isValidEnum(STATUSES, status)) {
+      return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "INVALID_STATUS");
+    }
+
+    if (!isMongoObjectId(id)) {
+      return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "INVALID_OBJECT_ID");
+    }
+
+    const isIdExist = await checKFieldValueExist(modelName, uniqueField, id);
+
+    if (!isIdExist) {
+      return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "INVALID_RECORD", [], { field1: "Notification" });
+    }
+
+    const updateData = {
+      query: { id },
+      update: { status, updatedBy },
+    };
+
+    const result = await performModelQuery(modelName, operation, updateData);
+
+    if (result.modifiedCount > 0) {
+      return formatResponse(RESPONSE_STATUS.SUCCESS, HTTP_CODE.OK, "STATUS_UPDATED");
+    } else {
+      return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "DATA_UPDATE_ERROR");
+    }
+  } catch (error) {
+    console.log(error);
+    return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.SERVER_ERROR, "SOMETHING_WENT_WRONG");
+  }
 }
