@@ -57,7 +57,7 @@ export const updateEmailTemplate = async (event: APIGatewayProxyEventV2) => {
         const uniqueField2 = 'id';
         const operation = "update";
 
-        if (isValidEnum(STATUSES, isAutomatic)) {
+        if (!isValidEnum(STATUSES, isAutomatic)) {
             return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "INVALID_FIELD", [], { field1: "isAutomatic" });
         }
 
@@ -68,6 +68,10 @@ export const updateEmailTemplate = async (event: APIGatewayProxyEventV2) => {
         const missingFields = newRequiredFieldsValidation(requiredFields, input);
         if (missingFields.length > 0) {
             return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "ALL_VALUES_REQUIRED", null, { fields: missingFields });
+        }
+
+        if (!isMongoObjectId(String(id))) {
+            return formatResponse(RESPONSE_STATUS.ERROR, HTTP_CODE.OK, "INVALID_FIELD", [], { field1: "id" });
         }
 
         if (isAutomatic === 1 && (subject !== undefined || bodyContent !== undefined)) {
